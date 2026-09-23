@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>Fire at the Moon Palace</title>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: #080510;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* =========================
+   9:16 GAME SCREEN
+   ========================= */
+
+#game {
+
+    position: relative;
+
+    width: min(100vw, 56.25vh);
+    height: min(177.78vw, 100vh);
+
+    aspect-ratio: 9 / 16;
+
+    overflow: hidden;
+
+    background: black;
+
+    user-select: none;
+
+}
+
+
+/* =========================
+   CHANG'E IMAGE
+   ========================= */
+
+#scene {
+
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    left: 0;
+    top: 0;
+
+    transition:
+        opacity 0.25s ease;
+
+}
+
+
+/* =========================
+   DARK GRADIENT
+   makes bottom controls readable
+   ========================= */
+
+.bottomShade {
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 25%;
+
+    background:
+        linear-gradient(
+            rgba(0,0,0,.75),
+            transparent
+        );
+
+    pointer-events: none;
+
+}
+
+
+/* =========================
+   PROGRESS AREA
+   ========================= */
+
+#progressPanel {
+
+    position: absolute;
+
+    left: 7%;
+    top: 4%;
+
+    width: 86%;
+
+    text-align: center;
+
+    color: white;
+
+    text-shadow:
+        0 2px 5px black;
+
+}
+
+
+#wakeText {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-bottom: 8px;
+
+}
+
+
+/* Progress bar */
+
+.progressOuter {
+
+    width: 100%;
+
+    height: 15px;
+
+    background:
+        rgba(255,255,255,.25);
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    margin-bottom: 10px;
+
+}
+
+
+#progressBar {
+
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffd15c,
+            #ff8a42
+        );
+
+    transition:
+        width .4s ease;
+
+}
+
+
+/* Shake circles */
+
+#shakeDots {
+
+    font-size: 22px;
+
+    letter-spacing: 7px;
+
+    margin-bottom: 6px;
+
+}
+
+
+#shakeInstruction {
+
+    font-size: 15px;
+
+}
+
+
+/* =========================
+   START SCREEN
+   ========================= */
+
+#startScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 10;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    padding: 30px;
+
+    color: white;
+
+    background:
+        rgba(5,2,10,.88);
+
+}
+
+
+.startFire {
+
+    font-size: 55px;
+
+    margin-bottom: 12px;
+
+    animation:
+        firePulse 1s infinite alternate;
+
+}
+
+
+@keyframes firePulse {
+
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.15);
+    }
+
+}
+
+
+#startScreen h1 {
+
+    margin: 0 0 14px;
+
+    color: #ffd36a;
+
+    font-size: 27px;
+
+}
+
+
+#startScreen p {
+
+    margin:
+        0 0 25px;
+
+    line-height: 1.45;
+
+    font-size: 16px;
+
+}
+
+
+#startButton {
+
+    border: none;
+
+    border-radius: 30px;
+
+    padding:
+        15px 32px;
+
+    font-size: 19px;
+
+    font-weight: bold;
+
+    color: #411300;
+
+    background:
+        linear-gradient(
+            #ffe27c,
+            #ff9d3d
+        );
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 20px
+        rgba(255,150,40,.7);
+
+}
+
+
+/* =========================
+   DESKTOP TEST BUTTON
+   ========================= */
+
+#testShake {
+
+    position: absolute;
+
+    right: 10px;
+    top: 10px;
+
+    z-index: 8;
+
+    border: 1px solid
+        rgba(255,255,255,.5);
+
+    border-radius: 12px;
+
+    padding: 8px 12px;
+
+    color: white;
+
+    background:
+        rgba(0,0,0,.55);
+
+    font-size: 12px;
+
+    display: none;
+
+}
+
+
+/* =========================
+   SUCCESS MESSAGE
+   ========================= */
+
+#success {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 9;
+
+    display: none;
+
+    align-items: flex-start;
+
+    justify-content: center;
+
+    padding-top: 5%;
+
+    pointer-events: none;
+
+}
+
+
+.successBox {
+
+    color: white;
+
+    text-align: center;
+
+    font-weight: bold;
+
+    font-size: 18px;
+
+    padding:
+        12px 20px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(20,40,70,.70);
+
+    text-shadow:
+        0 2px 5px black;
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div id="game">
+
+
+    <!-- Current Chang'e image -->
+
+    <img
+        id="scene"
+        src="change-00.png"
+        alt="Chang'e sleeping while the Moon Palace burns"
+    >
+
+
+
+    <div class="bottomShade"></div>
+
+
+
+    <!-- Progress -->
+
+    <div id="progressPanel">
+
+        <div id="wakeText">
+            Wake Chang'e! — 0%
+        </div>
+
+
+        <div class="progressOuter">
+
+            <div id="progressBar"></div>
+
+        </div>
+
+
+        <div id="shakeDots">
+            ○ ○ ○
+        </div>
+
+
+        <div id="shakeInstruction">
+            📱 Shake your phone!
+        </div>
+
+    </div>
+
+
+
+    <!-- Desktop testing -->
+
+    <button
+        id="testShake"
+        type="button">
+
+        TEST SHAKE
+
+    </button>
+
+
+
+    <!-- Success -->
+
+    <div id="success">
+
+        <div class="successBox">
+
+            💦 Moon Spring activated!
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Start screen -->
+
+    <div id="startScreen">
+
+        <div class="startFire">
+            🔥
+        </div>
+
+
+        <h1>
+            Fire at the Moon Palace!
+        </h1>
+
+
+        <p>
+            Chang'e is fast asleep!<br>
+            Shake your phone to wake her<br>
+            and save the treasure!
+        </p>
+
+
+        <button
+            id="startButton"
+            type="button">
+
+            🔥 START
+
+        </button>
+
+    </div>
+
+
+
+    <!-- AUDIO -->
+
+    <audio
+        id="fireSound"
+        src="FireSound.mp3"
+        loop>
+    </audio>
+
+
+    <audio
+        id="sleepSound"
+        src="SleepSound.mp3"
+        loop>
+    </audio>
+
+
+    <audio
+        id="waterSound"
+        src="WaterSound.mp3">
+    </audio>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   ELEMENTS
+   ========================= */
+
+
+const scene =
+document.getElementById("scene");
+
+
+const progressBar =
+document.getElementById("progressBar");
+
+
+const wakeText =
+document.getElementById("wakeText");
+
+
+const shakeDots =
+document.getElementById("shakeDots");
+
+
+const shakeInstruction =
+document.getElementById("shakeInstruction");
+
+
+const startScreen =
+document.getElementById("startScreen");
+
+
+const startButton =
+document.getElementById("startButton");
+
+
+const testShake =
+document.getElementById("testShake");
+
+
+const success =
+document.getElementById("success");
+
+
+const fireSound =
+document.getElementById("fireSound");
+
+
+const sleepSound =
+document.getElementById("sleepSound");
+
+
+const waterSound =
+document.getElementById("waterSound");
+
+
+
+/* =========================
+   GAME SETTINGS
+   ========================= */
+
+
+const stages = [
+
+    {
+        percent: 0,
+        image: "change-00.png",
+        sleepVolume: 1.00,
+        fireVolume: 0.25
+    },
+
+    {
+        percent: 20,
+        image: "change-20.png",
+        sleepVolume: 0.90,
+        fireVolume: 0.35
+    },
+
+    {
+        percent: 40,
+        image: "change-40.png",
+        sleepVolume: 0.70,
+        fireVolume: 0.50
+    },
+
+    {
+        percent: 60,
+        image: "change-60.png",
+        sleepVolume: 0,
+        fireVolume: 0.70
+    },
+
+    {
+        percent: 80,
+        image: "change-80.png",
+        sleepVolume: 0,
+        fireVolume: 1.00
+    },
+
+    {
+        percent: 100,
+        image: "change-100.png",
+        sleepVolume: 0,
+        fireVolume: 0
+    }
+
+];
+
+
+let stageIndex = 0;
+
+
+let shakesThisStage = 0;
+
+
+const shakesNeeded = 3;
+
+
+let gameStarted = false;
+
+
+let gameFinished = false;
+
+
+let lastShakeTime = 0;
+
+
+/*
+   Higher number =
+   harder shake required.
+
+   We can adjust this
+   after phone testing.
+*/
+
+const shakeThreshold = 18;
+
+
+const shakeCooldown = 400;
+
+
+
+/* =========================
+   START GAME
+   ========================= */
+
+
+async function startGame() {
+
+
+    /*
+       iPhone / iPad may require
+       motion permission.
+    */
+
+
+    if (
+
+        typeof DeviceMotionEvent !== "undefined"
+
+        &&
+
+        typeof DeviceMotionEvent.requestPermission
+        === "function"
+
+    ) {
+
+
+        try {
+
+
+            const permission =
+            await DeviceMotionEvent
+            .requestPermission();
+
+
+            if (permission !== "granted") {
+
+
+                alert(
+                    "Motion access is needed to play the shake game."
+                );
+
+
+                return;
+
+            }
+
+
+        }
+
+        catch (error) {
+
+
+            console.log(
+                "Motion permission error:",
+                error
+            );
+
+
+        }
+
+    }
+
+
+
+    gameStarted = true;
+
+
+    startScreen.style.display =
+        "none";
+
+
+
+    /*
+       Start both sounds because
+       user has now interacted
+       with the page.
+    */
+
+
+    fireSound.volume = 0.25;
+
+
+    sleepSound.volume = 1.00;
+
+
+    fireSound.play()
+    .catch(() => {});
+
+
+    sleepSound.play()
+    .catch(() => {});
+
+
+
+    updateStage();
+
+
+
+    window.addEventListener(
+        "devicemotion",
+        detectShake
+    );
+
+
+
+    /*
+       Show test button on
+       computers without touch.
+    */
+
+
+    if (
+
+        !("ontouchstart" in window)
+
+    ) {
+
+        testShake.style.display =
+            "block";
+
+    }
+
+}
+
+
+
+/* =========================
+   DETECT SHAKE
+   ========================= */
+
+
+function detectShake(event) {
+
+
+    if (
+
+        !gameStarted ||
+        gameFinished
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    const acceleration =
+        event.accelerationIncludingGravity;
+
+
+    if (!acceleration) {
+
+        return;
+
+    }
+
+
+
+    const x =
+        acceleration.x || 0;
+
+
+    const y =
+        acceleration.y || 0;
+
+
+    const z =
+        acceleration.z || 0;
+
+
+
+    /*
+       Calculate overall movement.
+    */
+
+
+    const strength =
+        Math.sqrt(
+
+            x * x +
+            y * y +
+            z * z
+
+        );
+
+
+
+    const now =
+        Date.now();
+
+
+
+    if (
+
+        strength > shakeThreshold
+
+        &&
+
+        now - lastShakeTime >
+        shakeCooldown
+
+    ) {
+
+
+        lastShakeTime =
+            now;
+
+
+        registerShake();
+
+    }
+
+}
+
+
+
+/* =========================
+   REGISTER ONE SHAKE
+   ========================= */
+
+
+function registerShake() {
+
+
+    if (gameFinished) {
+
+        return;
+
+    }
+
+
+    shakesThisStage++;
+
+
+
+    /*
+       Optional vibration
+       where browser supports it.
+    */
+
+
+    if (navigator.vibrate) {
+
+        navigator.vibrate(35);
+
+    }
+
+
+
+    updateShakeDots();
+
+
+
+    /*
+       Three shakes =
+       next wake stage
+    */
+
+
+    if (
+
+        shakesThisStage >=
+        shakesNeeded
+
+    ) {
+
+
+        shakesThisStage = 0;
+
+
+        stageIndex++;
+
+
+
+        if (
+
+            stageIndex >=
+            stages.length - 1
+
+        ) {
+
+
+            stageIndex =
+                stages.length - 1;
+
+
+            finishGame();
+
+
+        }
+
+        else {
+
+
+            updateStage();
+
+
+            if (navigator.vibrate) {
+
+                navigator.vibrate(
+                    [60,40,60]
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+
+
+/* =========================
+   UPDATE IMAGE + AUDIO
+   ========================= */
+
+
+function updateStage() {
+
+
+    const stage =
+        stages[stageIndex];
+
+
+
+    scene.style.opacity =
+        "0.3";
+
+
+    setTimeout(
+        function() {
+
+
+            scene.src =
+                stage.image;
+
+
+            scene.style.opacity =
+                "1";
+
+
+        },
+
+        150
+    );
+
+
+
+    progressBar.style.width =
+        stage.percent + "%";
+
+
+    wakeText.textContent =
+        "Wake Chang'e! — "
+        + stage.percent
+        + "%";
+
+
+
+    fireSound.volume =
+        stage.fireVolume;
+
+
+
+    if (
+
+        stage.sleepVolume > 0
+
+    ) {
+
+
+        sleepSound.volume =
+            stage.sleepVolume;
+
+
+        if (sleepSound.paused) {
+
+            sleepSound.play()
+            .catch(() => {});
+
+        }
+
+
+    }
+
+    else {
+
+
+        sleepSound.pause();
+
+    }
+
+
+
+    updateShakeDots();
+
+}
+
+
+
+/* =========================
+   SHAKE DOTS
+   ========================= */
+
+
+function updateShakeDots() {
+
+
+    let dots = "";
+
+
+    for (
+
+        let i = 0;
+
+        i < shakesNeeded;
+
+        i++
+
+    ) {
+
+
+        if (
+
+            i < shakesThisStage
+
+        ) {
+
+
+            dots += "● ";
+
+
+        }
+
+        else {
+
+
+            dots += "○ ";
+
+        }
+
+    }
+
+
+    shakeDots.textContent =
+        dots.trim();
+
+}
+
+
+
+/* =========================
+   100% SUCCESS
+   ========================= */
+
+
+function finishGame() {
+
+
+    gameFinished = true;
+
+
+
+    progressBar.style.width =
+        "100%";
+
+
+    wakeText.textContent =
+        "Chang'e is awake! — 100%";
+
+
+    shakeDots.style.display =
+        "none";
+
+
+    shakeInstruction.textContent =
+        "💦 Moon Spring!";
+
+
+
+    /*
+       Stop fire + sleeping
+    */
+
+
+    fireSound.pause();
+
+
+    sleepSound.pause();
+
+
+
+    /*
+       Change to final image
+    */
+
+
+    scene.style.opacity =
+        "0.3";
+
+
+    setTimeout(
+        function() {
+
+
+            scene.src =
+                "change-100.png";
+
+
+            scene.style.opacity =
+                "1";
+
+
+            /*
+               WATER!
+            */
+
+
+            waterSound.volume =
+                1.0;
+
+
+            waterSound.currentTime =
+                0;
+
+
+            waterSound.play()
+            .catch(() => {});
+
+
+            success.style.display =
+                "flex";
+
+
+        },
+
+        300
+    );
+
+
+
+    window.removeEventListener(
+        "devicemotion",
+        detectShake
+    );
+
+}
+
+
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+
+startButton.addEventListener(
+
+    "click",
+
+    startGame
+
+);
+
+
+
+testShake.addEventListener(
+
+    "click",
+
+    function() {
+
+
+        if (
+
+            gameStarted &&
+            !gameFinished
+
+        ) {
+
+
+            registerShake();
+
+        }
+
+    }
+
+);
+
+
+</script>
+
+
+</body>
+
+</html>
