@@ -55,7 +55,6 @@ body {
     background: black;
 
     user-select: none;
-
 }
 
 
@@ -75,15 +74,12 @@ body {
     left: 0;
     top: 0;
 
-    transition:
-        opacity 0.25s ease;
-
+    transition: opacity 0.25s ease;
 }
 
 
 /* =========================
-   DARK GRADIENT
-   makes bottom controls readable
+   TOP DARK GRADIENT
    ========================= */
 
 .bottomShade {
@@ -103,7 +99,6 @@ body {
         );
 
     pointer-events: none;
-
 }
 
 
@@ -126,7 +121,6 @@ body {
 
     text-shadow:
         0 2px 5px black;
-
 }
 
 
@@ -137,7 +131,6 @@ body {
     font-weight: bold;
 
     margin-bottom: 8px;
-
 }
 
 
@@ -157,7 +150,6 @@ body {
     overflow: hidden;
 
     margin-bottom: 10px;
-
 }
 
 
@@ -176,7 +168,6 @@ body {
 
     transition:
         width .4s ease;
-
 }
 
 
@@ -189,14 +180,6 @@ body {
     letter-spacing: 7px;
 
     margin-bottom: 6px;
-
-}
-
-
-#shakeInstruction {
-
-    font-size: 15px;
-
 }
 
 
@@ -228,7 +211,6 @@ body {
 
     background:
         rgba(5,2,10,.88);
-
 }
 
 
@@ -240,7 +222,6 @@ body {
 
     animation:
         firePulse 1s infinite alternate;
-
 }
 
 
@@ -253,7 +234,6 @@ body {
     to {
         transform: scale(1.15);
     }
-
 }
 
 
@@ -264,7 +244,6 @@ body {
     color: #ffd36a;
 
     font-size: 27px;
-
 }
 
 
@@ -276,7 +255,6 @@ body {
     line-height: 1.45;
 
     font-size: 16px;
-
 }
 
 
@@ -306,7 +284,6 @@ body {
     box-shadow:
         0 0 20px
         rgba(255,150,40,.7);
-
 }
 
 
@@ -338,7 +315,6 @@ body {
     font-size: 12px;
 
     display: none;
-
 }
 
 
@@ -363,7 +339,6 @@ body {
     padding-top: 5%;
 
     pointer-events: none;
-
 }
 
 
@@ -387,7 +362,6 @@ body {
 
     text-shadow:
         0 2px 5px black;
-
 }
 
 
@@ -411,9 +385,7 @@ body {
     >
 
 
-
     <div class="bottomShade"></div>
-
 
 
     <!-- Progress -->
@@ -436,11 +408,7 @@ body {
             ○ ○ ○
         </div>
 
-
-        <div id="shakeInstruction"></div>
-
     </div>
-
 
 
     <!-- Desktop testing -->
@@ -452,7 +420,6 @@ body {
         TEST SHAKE
 
     </button>
-
 
 
     <!-- Success -->
@@ -468,7 +435,6 @@ body {
     </div>
 
 
-
     <!-- Start screen -->
 
     <div id="startScreen">
@@ -479,29 +445,30 @@ body {
 
 
         <h1>
-    🔥 月宮失火！<br>
-    Fire at the Moon Palace!
-</h1>
+            月宮失火！<br>
+            Fire at the Moon Palace!
+        </h1>
 
-<p>
-    神秘火焰正在吞噬月宮的寶物！<br>
-    嫦娥卻還在沉睡……<br><br>
 
-    Magical flames are closing in on<br>
-    the Moon Palace treasure!<br>
-    But Chang'e is still fast asleep...
-</p>
+        <p>
+            神秘火焰正在吞噬月宮的寶物！<br>
+            嫦娥卻還在沉睡……<br><br>
 
-<button
-    id="startButton"
-    type="button">
+            Magical flames are closing in on<br>
+            the Moon Palace treasure!<br>
+            But Chang'e is still fast asleep...
+        </p>
 
-    🔥 開始任務 / START
 
-</button>
+        <button
+            id="startButton"
+            type="button">
+
+            🔥 開始任務 / START
+
+        </button>
 
     </div>
-
 
 
     <!-- AUDIO -->
@@ -509,6 +476,7 @@ body {
     <audio
         id="fireSound"
         src="FireSound.mp3"
+        preload="auto"
         loop>
     </audio>
 
@@ -516,13 +484,15 @@ body {
     <audio
         id="sleepSound"
         src="SleepSound.mp3"
+        preload="auto"
         loop>
     </audio>
 
 
     <audio
         id="waterSound"
-        src="WaterSound.mp3">
+        src="WaterSound.mp3"
+        preload="auto">
     </audio>
 
 
@@ -537,9 +507,16 @@ body {
    ELEMENTS
    ========================= */
 
-
 const scene =
 document.getElementById("scene");
+
+
+const progressPanel =
+document.getElementById("progressPanel");
+
+
+const bottomShade =
+document.querySelector(".bottomShade");
 
 
 const progressBar =
@@ -552,10 +529,6 @@ document.getElementById("wakeText");
 
 const shakeDots =
 document.getElementById("shakeDots");
-
-
-const shakeInstruction =
-document.getElementById("shakeInstruction");
 
 
 const startScreen =
@@ -591,47 +564,56 @@ document.getElementById("waterSound");
    GAME SETTINGS
    ========================= */
 
-
 const stages = [
 
     {
         percent: 0,
         image: "Change-00.png",
+
+        /* Snoring dominant */
         sleepVolume: 1.00,
-        fireVolume: 0.25
+        fireVolume: 0.08
     },
 
     {
         percent: 20,
         image: "Change-20.png",
-        sleepVolume: 0.90,
-        fireVolume: 0.35
+
+        /* Snoring still dominant */
+        sleepVolume: 1.00,
+        fireVolume: 0.12
     },
 
     {
         percent: 40,
         image: "Change-40.png",
-        sleepVolume: 0.70,
-        fireVolume: 0.50
+
+        /* Chang'e beginning to wake */
+        sleepVolume: 0.85,
+        fireVolume: 0.20
     },
 
     {
         percent: 60,
         image: "Change-60.png",
+
+        /* Snoring stops */
         sleepVolume: 0,
-        fireVolume: 0.70
+        fireVolume: 0.35
     },
 
     {
         percent: 80,
         image: "Change-80.png",
+
         sleepVolume: 0,
-        fireVolume: 1.00
+        fireVolume: 0.55
     },
 
     {
         percent: 100,
         image: "Change-100.png",
+
         sleepVolume: 0,
         fireVolume: 0
     }
@@ -641,18 +623,13 @@ const stages = [
 
 let stageIndex = 0;
 
-
 let shakesThisStage = 0;
-
 
 const shakesNeeded = 3;
 
-
 let gameStarted = false;
 
-
 let gameFinished = false;
-
 
 let lastShakeTime = 0;
 
@@ -660,13 +637,9 @@ let lastShakeTime = 0;
 /*
    Higher number =
    harder shake required.
-
-   We can adjust this
-   after phone testing.
 */
 
 const shakeThreshold = 18;
-
 
 const shakeCooldown = 400;
 
@@ -676,7 +649,6 @@ const shakeCooldown = 400;
    START GAME
    ========================= */
 
-
 async function startGame() {
 
 
@@ -684,7 +656,6 @@ async function startGame() {
        iPhone / iPad may require
        motion permission.
     */
-
 
     if (
 
@@ -710,7 +681,7 @@ async function startGame() {
 
 
                 alert(
-                    "Motion access is needed to play the shake game."
+                    "Motion access is needed to play the game."
                 );
 
 
@@ -729,7 +700,6 @@ async function startGame() {
                 error
             );
 
-
         }
 
     }
@@ -744,25 +714,99 @@ async function startGame() {
 
 
 
-    /*
-       Start both sounds because
-       user has now interacted
-       with the page.
-    */
+    /* =========================
+       START MAIN AUDIO
+
+       Fire is deliberately quiet.
+       Snoring is the main sound.
+       ========================= */
 
 
-    fireSound.volume = 0.25;
-
+    fireSound.volume = 0.08;
 
     sleepSound.volume = 1.00;
 
 
     fireSound.play()
-    .catch(() => {});
+    .catch((error) => {
+
+        console.log(
+            "Fire sound error:",
+            error
+        );
+
+    });
 
 
     sleepSound.play()
-    .catch(() => {});
+    .catch((error) => {
+
+        console.log(
+            "Sleep sound error:",
+            error
+        );
+
+    });
+
+
+
+    /* =========================
+       UNLOCK WATER AUDIO
+
+       IMPORTANT FOR IPHONE:
+
+       WaterSound is started during
+       the player's START interaction.
+
+       It is silent, immediately
+       paused and reset.
+
+       This prepares/unlocks the
+       audio so it can be played
+       later when the game reaches
+       100%.
+       ========================= */
+
+
+    waterSound.volume = 0;
+
+
+    waterSound.play()
+    .then(() => {
+
+
+        waterSound.pause();
+
+
+        waterSound.currentTime = 0;
+
+
+        waterSound.volume = 1.0;
+
+
+        console.log(
+            "Water sound unlocked."
+        );
+
+
+    })
+    .catch((error) => {
+
+
+        console.log(
+            "Water sound unlock error:",
+            error
+        );
+
+
+        /*
+           Restore normal volume even
+           if Safari reports an error.
+        */
+
+        waterSound.volume = 1.0;
+
+    });
 
 
 
@@ -778,10 +822,9 @@ async function startGame() {
 
 
     /*
-       Show test button on
-       computers without touch.
+       Show test button on computers
+       without touch.
     */
-
 
     if (
 
@@ -802,7 +845,6 @@ async function startGame() {
    DETECT SHAKE
    ========================= */
 
-
 function detectShake(event) {
 
 
@@ -818,7 +860,6 @@ function detectShake(event) {
     }
 
 
-
     const acceleration =
         event.accelerationIncludingGravity;
 
@@ -828,7 +869,6 @@ function detectShake(event) {
         return;
 
     }
-
 
 
     const x =
@@ -843,12 +883,6 @@ function detectShake(event) {
         acceleration.z || 0;
 
 
-
-    /*
-       Calculate overall movement.
-    */
-
-
     const strength =
         Math.sqrt(
 
@@ -859,10 +893,8 @@ function detectShake(event) {
         );
 
 
-
     const now =
         Date.now();
-
 
 
     if (
@@ -893,7 +925,6 @@ function detectShake(event) {
    REGISTER ONE SHAKE
    ========================= */
 
-
 function registerShake() {
 
 
@@ -907,19 +938,11 @@ function registerShake() {
     shakesThisStage++;
 
 
-
-    /*
-       Optional vibration
-       where browser supports it.
-    */
-
-
     if (navigator.vibrate) {
 
         navigator.vibrate(35);
 
     }
-
 
 
     updateShakeDots();
@@ -930,7 +953,6 @@ function registerShake() {
        Three shakes =
        next wake stage
     */
-
 
     if (
 
@@ -944,7 +966,6 @@ function registerShake() {
 
 
         stageIndex++;
-
 
 
         if (
@@ -990,13 +1011,11 @@ function registerShake() {
    UPDATE IMAGE + AUDIO
    ========================= */
 
-
 function updateStage() {
 
 
     const stage =
         stages[stageIndex];
-
 
 
     scene.style.opacity =
@@ -1021,7 +1040,6 @@ function updateStage() {
     );
 
 
-
     progressBar.style.width =
         stage.percent + "%";
 
@@ -1032,11 +1050,17 @@ function updateStage() {
         + "%";
 
 
+    /*
+       Adjust fire volume
+    */
 
     fireSound.volume =
         stage.fireVolume;
 
 
+    /*
+       Adjust snoring
+    */
 
     if (
 
@@ -1067,7 +1091,6 @@ function updateStage() {
     }
 
 
-
     updateShakeDots();
 
 }
@@ -1077,7 +1100,6 @@ function updateStage() {
 /* =========================
    SHAKE DOTS
    ========================= */
-
 
 function updateShakeDots() {
 
@@ -1129,47 +1151,44 @@ function updateShakeDots() {
    100% SUCCESS
    ========================= */
 
-
 function finishGame() {
 
 
     gameFinished = true;
 
 
+    /*
+       Remove the progress UI
+       so the final image and
+       secret code remain clear.
+    */
 
-    progressBar.style.width =
-        "100%";
-
-
-    wakeText.textContent =
-        "Chang'e is awake! — 100%";
-
-
-    shakeDots.style.display =
+    progressPanel.style.display =
         "none";
 
 
-    shakeInstruction.textContent =
-        "💦 Moon Spring!";
+    bottomShade.style.display =
+        "none";
+
+
+    testShake.style.display =
+        "none";
 
 
 
     /*
-       Stop fire + sleeping
+       Stop fire and snoring.
     */
 
-
     fireSound.pause();
-
 
     sleepSound.pause();
 
 
 
     /*
-       Change to final image
+       Change to final image.
     */
-
 
     scene.style.opacity =
         "0.3";
@@ -1188,21 +1207,44 @@ function finishGame() {
 
 
             /*
-               WATER!
+               PLAY WATER SOUND
             */
 
+            waterSound.pause();
+
+            waterSound.currentTime =
+                0;
 
             waterSound.volume =
                 1.0;
 
 
-            waterSound.currentTime =
-                0;
+            const waterPlay =
+                waterSound.play();
 
 
-            waterSound.play()
-            .catch(() => {});
+            if (waterPlay !== undefined) {
 
+
+                waterPlay
+                .catch((error) => {
+
+
+                    console.log(
+                        "Water playback failed:",
+                        error
+                    );
+
+
+                });
+
+            }
+
+
+            /*
+               Show success banner
+               at the TOP.
+            */
 
             success.style.display =
                 "flex";
@@ -1212,7 +1254,6 @@ function finishGame() {
 
         300
     );
-
 
 
     window.removeEventListener(
@@ -1228,7 +1269,6 @@ function finishGame() {
    BUTTONS
    ========================= */
 
-
 startButton.addEventListener(
 
     "click",
@@ -1236,7 +1276,6 @@ startButton.addEventListener(
     startGame
 
 );
-
 
 
 testShake.addEventListener(
