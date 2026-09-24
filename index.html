@@ -74,7 +74,8 @@ body {
     left: 0;
     top: 0;
 
-    transition: opacity 0.25s ease;
+    transition:
+        opacity 0.25s ease;
 }
 
 
@@ -193,7 +194,7 @@ body {
 
     inset: 0;
 
-    z-index: 10;
+    z-index: 30;
 
     display: flex;
 
@@ -298,7 +299,7 @@ body {
     right: 10px;
     top: 10px;
 
-    z-index: 8;
+    z-index: 15;
 
     border: 1px solid
         rgba(255,255,255,.5);
@@ -328,7 +329,7 @@ body {
 
     inset: 0;
 
-    z-index: 9;
+    z-index: 25;
 
     display: none;
 
@@ -365,6 +366,91 @@ body {
 }
 
 
+/* =========================
+   HIDDEN FALLBACK TRIGGER
+
+   Invisible top-right area.
+   Tap once to reveal the
+   manual Wake Chang'e button.
+   ========================= */
+
+#fallbackTrigger {
+
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 25%;
+    height: 15%;
+
+    z-index: 20;
+
+    background: transparent;
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+
+/* =========================
+   FALLBACK BUTTON
+   ========================= */
+
+#fallbackButton {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    z-index: 21;
+
+    display: none;
+
+    border: none;
+
+    border-radius: 32px;
+
+    padding:
+        17px 30px;
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    white-space: nowrap;
+
+    color: #411300;
+
+    background:
+        linear-gradient(
+            #ffe27c,
+            #ff9d3d
+        );
+
+    box-shadow:
+        0 0 22px
+        rgba(255,150,40,.8);
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+
+#fallbackButton:active {
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.95);
+}
+
+
 </style>
 
 </head>
@@ -384,6 +470,8 @@ body {
         alt="Chang'e sleeping while the Moon Palace burns"
     >
 
+
+    <!-- Top dark gradient -->
 
     <div class="bottomShade"></div>
 
@@ -409,6 +497,30 @@ body {
         </div>
 
     </div>
+
+
+    <!--
+        Invisible emergency fallback.
+
+        Tap the top-right corner
+        to reveal the manual button.
+    -->
+
+    <div
+        id="fallbackTrigger"
+        aria-hidden="true">
+    </div>
+
+
+    <!-- Manual fallback button -->
+
+    <button
+        id="fallbackButton"
+        type="button">
+
+        🐇 Wake Chang'e
+
+    </button>
 
 
     <!-- Desktop testing -->
@@ -507,6 +619,7 @@ body {
    ELEMENTS
    ========================= */
 
+
 const scene =
 document.getElementById("scene");
 
@@ -547,6 +660,14 @@ const success =
 document.getElementById("success");
 
 
+const fallbackTrigger =
+document.getElementById("fallbackTrigger");
+
+
+const fallbackButton =
+document.getElementById("fallbackButton");
+
+
 const fireSound =
 document.getElementById("fireSound");
 
@@ -564,13 +685,14 @@ document.getElementById("waterSound");
    GAME SETTINGS
    ========================= */
 
+
 const stages = [
 
     {
         percent: 0,
         image: "Change-00.png",
 
-        /* Snoring dominant */
+        /* Snoring is dominant */
         sleepVolume: 1.00,
         fireVolume: 0.08
     },
@@ -623,13 +745,21 @@ const stages = [
 
 let stageIndex = 0;
 
+
 let shakesThisStage = 0;
+
 
 const shakesNeeded = 3;
 
+
 let gameStarted = false;
 
+
 let gameFinished = false;
+
+
+let fallbackMode = false;
+
 
 let lastShakeTime = 0;
 
@@ -641,6 +771,7 @@ let lastShakeTime = 0;
 
 const shakeThreshold = 18;
 
+
 const shakeCooldown = 400;
 
 
@@ -649,6 +780,7 @@ const shakeCooldown = 400;
    START GAME
    ========================= */
 
+
 async function startGame() {
 
 
@@ -656,6 +788,7 @@ async function startGame() {
        iPhone / iPad may require
        motion permission.
     */
+
 
     if (
 
@@ -677,15 +810,24 @@ async function startGame() {
             .requestPermission();
 
 
+            /*
+               IMPORTANT:
+
+               Even if motion permission
+               is denied, we still allow
+               the game to start.
+
+               The hidden fallback can
+               then be used.
+            */
+
+
             if (permission !== "granted") {
 
 
-                alert(
-                    "Motion access is needed to play the game."
+                console.log(
+                    "Motion permission not granted. Fallback remains available."
                 );
-
-
-                return;
 
             }
 
@@ -699,6 +841,13 @@ async function startGame() {
                 "Motion permission error:",
                 error
             );
+
+
+            /*
+               Do NOT stop the game.
+               Manual fallback remains
+               available.
+            */
 
         }
 
@@ -715,16 +864,19 @@ async function startGame() {
 
 
     /* =========================
-       START MAIN AUDIO
+       START FIRE + SNORING
 
        Fire is deliberately quiet.
        Snoring is the main sound.
        ========================= */
 
 
-    fireSound.volume = 0.08;
+    fireSound.volume =
+        0.08;
 
-    sleepSound.volume = 1.00;
+
+    sleepSound.volume =
+        1.00;
 
 
     fireSound.play()
@@ -752,66 +904,75 @@ async function startGame() {
 
     /* =========================
        UNLOCK WATER AUDIO
+       FOR IPHONE
 
-       IMPORTANT FOR IPHONE:
+       WaterSound is silently
+       started during the original
+       START interaction.
 
-       WaterSound is started during
-       the player's START interaction.
-
-       It is silent, immediately
-       paused and reset.
-
-       This prepares/unlocks the
-       audio so it can be played
-       later when the game reaches
-       100%.
+       This prepares it for later
+       playback at 100%.
        ========================= */
 
 
-    waterSound.volume = 0;
+    waterSound.volume =
+        0;
 
 
-    waterSound.play()
-    .then(() => {
+    const unlockWater =
+        waterSound.play();
 
 
-        waterSound.pause();
+    if (unlockWater !== undefined) {
 
 
-        waterSound.currentTime = 0;
+        unlockWater
+        .then(() => {
 
 
-        waterSound.volume = 1.0;
+            waterSound.pause();
 
 
-        console.log(
-            "Water sound unlocked."
-        );
+            waterSound.currentTime =
+                0;
 
 
-    })
-    .catch((error) => {
+            waterSound.volume =
+                1.0;
 
 
-        console.log(
-            "Water sound unlock error:",
-            error
-        );
+            console.log(
+                "Water sound unlocked."
+            );
 
 
-        /*
-           Restore normal volume even
-           if Safari reports an error.
-        */
+        })
+        .catch((error) => {
 
-        waterSound.volume = 1.0;
 
-    });
+            console.log(
+                "Water sound unlock error:",
+                error
+            );
+
+
+            waterSound.volume =
+                1.0;
+
+        });
+
+    }
 
 
 
     updateStage();
 
+
+
+    /*
+       Start listening for
+       real physical shaking.
+    */
 
 
     window.addEventListener(
@@ -822,15 +983,17 @@ async function startGame() {
 
 
     /*
-       Show test button on computers
-       without touch.
+       Show TEST SHAKE on
+       desktop computers.
     */
+
 
     if (
 
         !("ontouchstart" in window)
 
     ) {
+
 
         testShake.style.display =
             "block";
@@ -842,8 +1005,9 @@ async function startGame() {
 
 
 /* =========================
-   DETECT SHAKE
+   DETECT REAL SHAKE
    ========================= */
+
 
 function detectShake(event) {
 
@@ -855,9 +1019,11 @@ function detectShake(event) {
 
     ) {
 
+
         return;
 
     }
+
 
 
     const acceleration =
@@ -866,9 +1032,11 @@ function detectShake(event) {
 
     if (!acceleration) {
 
+
         return;
 
     }
+
 
 
     const x =
@@ -883,6 +1051,7 @@ function detectShake(event) {
         acceleration.z || 0;
 
 
+
     const strength =
         Math.sqrt(
 
@@ -893,8 +1062,10 @@ function detectShake(event) {
         );
 
 
+
     const now =
         Date.now();
+
 
 
     if (
@@ -922,27 +1093,50 @@ function detectShake(event) {
 
 
 /* =========================
-   REGISTER ONE SHAKE
+   REGISTER ONE SHAKE / TAP
+
+   Real shake,
+   fallback button,
+   and desktop test button
+
+   ALL use this same function.
    ========================= */
+
 
 function registerShake() {
 
 
-    if (gameFinished) {
+    if (
+
+        !gameStarted ||
+        gameFinished
+
+    ) {
+
 
         return;
 
     }
 
 
+
     shakesThisStage++;
+
+
+
+    /*
+       Small vibration where
+       supported.
+    */
 
 
     if (navigator.vibrate) {
 
+
         navigator.vibrate(35);
 
     }
+
 
 
     updateShakeDots();
@@ -950,9 +1144,10 @@ function registerShake() {
 
 
     /*
-       Three shakes =
-       next wake stage
+       Three shakes/taps =
+       next stage.
     */
+
 
     if (
 
@@ -962,10 +1157,12 @@ function registerShake() {
     ) {
 
 
-        shakesThisStage = 0;
+        shakesThisStage =
+            0;
 
 
         stageIndex++;
+
 
 
         if (
@@ -991,7 +1188,9 @@ function registerShake() {
             updateStage();
 
 
+
             if (navigator.vibrate) {
+
 
                 navigator.vibrate(
                     [60,40,60]
@@ -1011,6 +1210,7 @@ function registerShake() {
    UPDATE IMAGE + AUDIO
    ========================= */
 
+
 function updateStage() {
 
 
@@ -1018,11 +1218,18 @@ function updateStage() {
         stages[stageIndex];
 
 
+
+    /*
+       Fade current image.
+    */
+
+
     scene.style.opacity =
         "0.3";
 
 
     setTimeout(
+
         function() {
 
 
@@ -1037,7 +1244,14 @@ function updateStage() {
         },
 
         150
+
     );
+
+
+
+    /*
+       Progress percentage.
+    */
 
 
     progressBar.style.width =
@@ -1050,17 +1264,23 @@ function updateStage() {
         + "%";
 
 
+
     /*
-       Adjust fire volume
+       Fire gets progressively
+       stronger.
     */
+
 
     fireSound.volume =
         stage.fireVolume;
 
 
+
     /*
-       Adjust snoring
+       Snoring continues until
+       Chang'e reaches 60%.
     */
+
 
     if (
 
@@ -1074,6 +1294,7 @@ function updateStage() {
 
 
         if (sleepSound.paused) {
+
 
             sleepSound.play()
             .catch(() => {});
@@ -1091,6 +1312,7 @@ function updateStage() {
     }
 
 
+
     updateShakeDots();
 
 }
@@ -1098,13 +1320,15 @@ function updateStage() {
 
 
 /* =========================
-   SHAKE DOTS
+   SHAKE / TAP DOTS
    ========================= */
+
 
 function updateShakeDots() {
 
 
-    let dots = "";
+    let dots =
+        "";
 
 
     for (
@@ -1125,7 +1349,8 @@ function updateShakeDots() {
         ) {
 
 
-            dots += "● ";
+            dots +=
+                "● ";
 
 
         }
@@ -1133,7 +1358,8 @@ function updateShakeDots() {
         else {
 
 
-            dots += "○ ";
+            dots +=
+                "○ ";
 
         }
 
@@ -1148,20 +1374,121 @@ function updateShakeDots() {
 
 
 /* =========================
+   HIDDEN FALLBACK TRIGGER
+   ========================= */
+
+
+fallbackTrigger.addEventListener(
+
+    "click",
+
+    function() {
+
+
+        if (
+
+            !gameStarted ||
+            gameFinished ||
+            fallbackMode
+
+        ) {
+
+
+            return;
+
+        }
+
+
+
+        /*
+           Activate fallback mode.
+        */
+
+
+        fallbackMode =
+            true;
+
+
+
+        /*
+           Reveal large manual
+           button in centre.
+        */
+
+
+        fallbackButton.style.display =
+            "block";
+
+
+
+        /*
+           Remove invisible trigger
+           so it cannot accidentally
+           activate again.
+        */
+
+
+        fallbackTrigger.style.display =
+            "none";
+
+    }
+
+);
+
+
+
+/* =========================
+   FALLBACK WAKE BUTTON
+
+   Each tap = one shake.
+   ========================= */
+
+
+fallbackButton.addEventListener(
+
+    "click",
+
+    function() {
+
+
+        if (
+
+            gameStarted &&
+            !gameFinished
+
+        ) {
+
+
+            registerShake();
+
+        }
+
+    }
+
+);
+
+
+
+/* =========================
    100% SUCCESS
    ========================= */
+
 
 function finishGame() {
 
 
-    gameFinished = true;
+    gameFinished =
+        true;
+
 
 
     /*
-       Remove the progress UI
-       so the final image and
-       secret code remain clear.
+       Hide progress UI.
+
+       This keeps the final
+       secret code visible.
     */
+
 
     progressPanel.style.display =
         "none";
@@ -1175,12 +1502,22 @@ function finishGame() {
         "none";
 
 
+    fallbackButton.style.display =
+        "none";
+
+
+    fallbackTrigger.style.display =
+        "none";
+
+
 
     /*
        Stop fire and snoring.
     */
 
+
     fireSound.pause();
+
 
     sleepSound.pause();
 
@@ -1190,11 +1527,13 @@ function finishGame() {
        Change to final image.
     */
 
+
     scene.style.opacity =
         "0.3";
 
 
     setTimeout(
+
         function() {
 
 
@@ -1206,24 +1545,34 @@ function finishGame() {
                 "1";
 
 
-            /*
+
+            /* =========================
                PLAY WATER SOUND
-            */
+               ========================= */
+
 
             waterSound.pause();
+
 
             waterSound.currentTime =
                 0;
 
+
             waterSound.volume =
                 1.0;
+
 
 
             const waterPlay =
                 waterSound.play();
 
 
-            if (waterPlay !== undefined) {
+
+            if (
+
+                waterPlay !== undefined
+
+            ) {
 
 
                 waterPlay
@@ -1241,10 +1590,12 @@ function finishGame() {
             }
 
 
+
             /*
                Show success banner
-               at the TOP.
+               at TOP of screen.
             */
+
 
             success.style.display =
                 "flex";
@@ -1253,7 +1604,15 @@ function finishGame() {
         },
 
         300
+
     );
+
+
+
+    /*
+       Stop listening for
+       physical shaking.
+    */
 
 
     window.removeEventListener(
@@ -1266,8 +1625,9 @@ function finishGame() {
 
 
 /* =========================
-   BUTTONS
+   START BUTTON
    ========================= */
+
 
 startButton.addEventListener(
 
@@ -1276,6 +1636,14 @@ startButton.addEventListener(
     startGame
 
 );
+
+
+
+/* =========================
+   DESKTOP TEST BUTTON
+
+   Each click = one shake.
+   ========================= */
 
 
 testShake.addEventListener(
